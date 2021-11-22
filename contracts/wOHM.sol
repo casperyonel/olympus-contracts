@@ -1,3 +1,7 @@
+/**
+ *Submitted for verification at Etherscan.io on 2021-06-12
+*/
+
 // SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
 
@@ -737,106 +741,64 @@ library SafeERC20 {
     }
 }
 
-interface IStaking {
-    function stake( uint _amount, address _recipient ) external returns ( bool );
-
-    function unstake( uint _amount, address _recipient ) external returns ( bool );
-
+interface IMEMO {
     function index() external view returns ( uint );
 }
 
-contract wOHM is ERC20 {
+contract wMEMO is ERC20 {
     using SafeERC20 for ERC20;
     using Address for address;
     using SafeMath for uint;
 
-    address public immutable staking;
-    address public immutable OHM;
-    address public immutable sOHM;
+    address public immutable MEMO;
 
-    constructor( address _staking, address _OHM, address _sOHM ) ERC20( 'Wrapped sOHM', 'wsOHM' ) {
-        require( _staking != address(0) );
-        staking = _staking;
-        require( _OHM != address(0) );
-        OHM = _OHM;
-        require( _sOHM != address(0) );
-        sOHM = _sOHM;
+    constructor( address _MEMO ) ERC20( 'Wrapped MEMO', 'wMEMO' ) {
+        require( _MEMO != address(0) );
+        MEMO = _MEMO;
     }
 
-        /**
-        @notice stakes OHM and wraps sOHM
+    /**
+        @notice wrap MEMO
         @param _amount uint
         @return uint
      */
-    function wrapFromOHM( uint _amount ) external returns ( uint ) {
-        IERC20( OHM ).transferFrom( msg.sender, address(this), _amount );
-
-        IERC20( OHM ).approve( staking, _amount ); // stake OHM for sOHM
-        IStaking( staking ).stake( _amount, address(this) );
-
-        uint value = wOHMValue( _amount );
+    function wrap( uint _amount ) external returns ( uint ) {
+        IERC20( MEMO ).transferFrom( msg.sender, address(this), _amount );
+        
+        uint value = MEMOTowMEMO( _amount );
         _mint( msg.sender, value );
         return value;
     }
 
     /**
-        @notice unwrap sOHM and unstake OHM
+        @notice unwrap MEMO
         @param _amount uint
         @return uint
      */
-    function unwrapToOHM( uint _amount ) external returns ( uint ) {
-        _burn( msg.sender, _amount );
-        
-        uint value = sOHMValue( _amount );
-        IERC20( sOHM ).approve( staking, value ); // unstake sOHM for OHM
-        IStaking( staking ).unstake( value, address(this) );
-
-        IERC20( OHM ).transfer( msg.sender, value );
-        return value;
-    }
-
-    /**
-        @notice wrap sOHM
-        @param _amount uint
-        @return uint
-     */
-    function wrapFromsOHM( uint _amount ) external returns ( uint ) {
-        IERC20( sOHM ).transferFrom( msg.sender, address(this), _amount );
-        
-        uint value = wOHMValue( _amount );
-        _mint( msg.sender, value );
-        return value;
-    }
-
-    /**
-        @notice unwrap sOHM
-        @param _amount uint
-        @return uint
-     */
-    function unwrapTosOHM( uint _amount ) external returns ( uint ) {
+    function unwrap( uint _amount ) external returns ( uint ) {
         _burn( msg.sender, _amount );
 
-        uint value = sOHMValue( _amount );
-        IERC20( sOHM ).transfer( msg.sender, value );
+        uint value = wMEMOToMEMO( _amount );
+        IERC20( MEMO ).transfer( msg.sender, value );
         return value;
     }
 
     /**
-        @notice converts wOHM amount to sOHM
+        @notice converts wMEMO amount to MEMO
         @param _amount uint
         @return uint
      */
-    function sOHMValue( uint _amount ) public view returns ( uint ) {
-        return _amount.mul( IStaking( staking ).index() ).div( 10 ** decimals() );
+    function wMEMOToMEMO( uint _amount ) public view returns ( uint ) {
+        return _amount.mul( IMEMO( MEMO ).index() ).div( 10 ** decimals() );
     }
 
     /**
-        @notice converts sOHM amount to wOHM
+        @notice converts MEMO amount to wMEMO
         @param _amount uint
         @return uint
      */
-    function wOHMValue( uint _amount ) public view returns ( uint ) {
-        return _amount.mul( 10 ** decimals() ).div( IStaking( staking ).index() );
+    function MEMOTowMEMO( uint _amount ) public view returns ( uint ) {
+        return _amount.mul( 10 ** decimals() ).div( IMEMO( MEMO ).index() );
     }
 
 }
