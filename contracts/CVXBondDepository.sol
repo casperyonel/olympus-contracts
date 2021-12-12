@@ -4,11 +4,11 @@ pragma solidity 0.7.5;
 import "./interfaces/IOtterTreasury.sol";
 import "./interfaces/IOtterStaking.sol";
 
-import "./libraries/Ownable.sol";
-import "./libraries/SafeMath.sol";
-import "./libraries/Math.sol";
-import "./libraries/FixedPoint.sol";
-import "./libraries/ERC20.sol";
+import "./interfaces/Ownable.sol";
+import "./interfaces/SafeMath.sol";
+import "./interfaces/Math.sol";
+import "./interfaces/FixedPoint.sol";
+import "./interfaces/ERC20.sol";
 
 interface IBondCalculator {
     function valuation( address _LP, uint _amount ) external view returns ( uint );
